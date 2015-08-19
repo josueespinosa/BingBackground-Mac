@@ -85,6 +85,6 @@ func setBackground() {
 }
 
 let urlBase = getBackgroundURLBase()
-let background = downloadBackground(urlBase + getResolutionExtension(urlBase));
+let background = downloadBackground(urlBase + getResolutionExtension(urlBase))
 saveBackground(background)
 setBackground()

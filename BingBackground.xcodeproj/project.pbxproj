@@ -88,6 +88,7 @@
 		CADE26161B8511380082235F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0640;
 				ORGANIZATIONNAME = "Josue Espinosa";
 				TargetAttributes = {
@@ -236,6 +237,7 @@
 				CADE26271B8511380082235F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
