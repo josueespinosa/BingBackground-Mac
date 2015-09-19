@@ -10,9 +10,17 @@ import Foundation
 import AppKit
 
 func downloadJSON() -> NSDictionary {
-    println("Downloading JSON...")
+    print("Downloading JSON...")
     let data = NSData(contentsOfURL: NSURL(string: "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")!)!
-    return NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers, error: nil) as! NSDictionary
+    var json : NSDictionary? = nil
+    
+    do {
+        json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as? NSDictionary
+    } catch let error as NSError {
+        NSLog("\(error.localizedDescription)")
+    }
+    
+    return json!
 }
 
 func getBackgroundURLBase() -> String {
@@ -23,7 +31,13 @@ func getBackgroundURLBase() -> String {
 func websiteExists(url: String) -> Bool {
     let request = NSURLRequest(URL: NSURL(string: url)!)
     var response: NSURLResponse? = nil
-    let data = NSURLConnection.sendSynchronousRequest(request, returningResponse: &response, error: nil) as NSData?
+    
+    do {
+        try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response) as NSData?
+    } catch let error as NSError {
+        NSLog("\(error.localizedDescription)")
+    }
+    
     let httpResponse = response as! NSHTTPURLResponse
     return httpResponse.statusCode == 200
 }
@@ -43,45 +57,53 @@ func getResolutionExtension(url: String) -> String {
     let potentialExtension = "_" + widthByHeight + ".jpg"
     
     if websiteExists(url + potentialExtension) {
-        println("Background for \(widthByHeight) found.")
+        print("Background for \(widthByHeight) found.")
         return potentialExtension
-    }
-    else {
-        println("No background for \(widthByHeight) was found.")
-        println("Using 1920x1080 instead.")
+    } else {
+        print("No background for \(widthByHeight) was found.")
+        print("Using 1920x1080 instead.")
         return "_1920x1080.jpg"
     }
 }
 
 func downloadBackground(url : String) -> NSData {
-    println("Downloading background...")
+    print("Downloading background...")
     return NSData(contentsOfURL: NSURL(string: url)!)!
 }
 
 func getBackgroundImagePath() -> String {
-    let picturesDirectory = (NSSearchPathForDirectoriesInDomains(.PicturesDirectory, .UserDomainMask, true)[0] as! String)
+    let picturesDirectory = NSSearchPathForDirectoriesInDomains(.PicturesDirectory, .UserDomainMask, true)[0]
     let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
-    let year = calendar?.component(.CalendarUnitYear, fromDate: NSDate())
+    let year = calendar?.component(.Year, fromDate: NSDate())
     let dateFormatter = NSDateFormatter()
     dateFormatter.dateFormat = "M-d-yyyy"
     let saveDirectory = picturesDirectory + "/Bing Backgrounds" + "/\(year!)"
     
-    let fileManager = NSFileManager.defaultManager()
-    fileManager.createDirectoryAtPath(saveDirectory, withIntermediateDirectories: true, attributes: nil, error: nil)
+    do {
+        try NSFileManager.defaultManager().createDirectoryAtPath(saveDirectory, withIntermediateDirectories: true, attributes: nil)
+    } catch let error as NSError {
+        NSLog("\(error.localizedDescription)")
+    }
 
     return saveDirectory + "/\(dateFormatter.stringFromDate(NSDate())).jpg"
 }
 
 func saveBackground(background : NSData) {
-    println("Saving background...")
+    print("Saving background...")
     background.writeToFile(getBackgroundImagePath(), atomically: true)
 }
 
 func setBackground() {
-    println("Setting background...")
+    print("Setting background...")
     let workspace = NSWorkspace.sharedWorkspace()
     let screen = NSScreen.mainScreen()!
-    workspace.setDesktopImageURL(NSURL(fileURLWithPath: getBackgroundImagePath())!, forScreen: screen, options: nil, error: nil)
+    
+    do {
+        try workspace.setDesktopImageURL(NSURL(fileURLWithPath: getBackgroundImagePath()), forScreen: screen, options: [:])
+    } catch let error as NSError {
+        NSLog("\(error.localizedDescription)")
+    }
+    
 }
 
 let urlBase = getBackgroundURLBase()
