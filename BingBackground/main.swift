@@ -96,12 +96,14 @@ func saveBackground(background : NSData) {
 func setBackground() {
     print("Setting background...")
     let workspace = NSWorkspace.sharedWorkspace()
-    let screen = NSScreen.mainScreen()!
     
-    do {
-        try workspace.setDesktopImageURL(NSURL(fileURLWithPath: getBackgroundImagePath()), forScreen: screen, options: [:])
-    } catch let error as NSError {
-        NSLog("\(error.localizedDescription)")
+    for screen in NSScreen.screens()! {
+        do {
+            let options = workspace.desktopImageOptionsForScreen(screen)
+            try workspace.setDesktopImageURL(NSURL(fileURLWithPath: getBackgroundImagePath()), forScreen: screen, options: options!)
+        } catch let error as NSError {
+            NSLog("\(error.localizedDescription)")
+        }
     }
     
 }
