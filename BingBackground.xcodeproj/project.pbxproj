@@ -25,6 +25,7 @@
 /* Begin PBXFileReference section */
 		CADE261E1B8511380082235F /* BingBackground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BingBackground; sourceTree = BUILT_PRODUCTS_DIR; };
 		CADE26211B8511380082235F /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		CAEFCEB81C9D8ED1004A37B7 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,6 +42,7 @@
 		CADE26151B8511380082235F = {
 			isa = PBXGroup;
 			children = (
+				CAEFCEB81C9D8ED1004A37B7 /* Media.xcassets */,
 				CADE26201B8511380082235F /* BingBackground */,
 				CADE261F1B8511380082235F /* Products */,
 			);
