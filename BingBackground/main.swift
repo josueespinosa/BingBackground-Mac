@@ -12,7 +12,7 @@ import AppKit
 func downloadJSON() -> NSDictionary {
     print("Downloading JSON...")
     let data = NSData(contentsOfURL: NSURL(string: "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")!)!
-    var json : NSDictionary? = nil
+    var json: NSDictionary? = nil
     
     do {
         json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as? NSDictionary
@@ -66,7 +66,7 @@ func getResolutionExtension(url: String) -> String {
     }
 }
 
-func downloadBackground(url : String) -> NSData {
+func downloadBackground(url: String) -> NSData {
     print("Downloading background...")
     return NSData(contentsOfURL: NSURL(string: url)!)!
 }
@@ -88,24 +88,32 @@ func getBackgroundImagePath() -> String {
     return saveDirectory + "/\(dateFormatter.stringFromDate(NSDate())).jpg"
 }
 
-func saveBackground(background : NSData) {
+func saveBackground(background: NSData) {
     print("Saving background...")
     background.writeToFile(getBackgroundImagePath(), atomically: true)
 }
 
 func setBackground() {
     print("Setting background...")
-    let workspace = NSWorkspace.sharedWorkspace()
     
-    for screen in NSScreen.screens()! {
-        do {
-            let options = workspace.desktopImageOptionsForScreen(screen)
-            try workspace.setDesktopImageURL(NSURL(fileURLWithPath: getBackgroundImagePath()), forScreen: screen, options: options!)
-        } catch let error as NSError {
-            NSLog("\(error.localizedDescription)")
+    let paths = NSSearchPathForDirectoriesInDomains(.ApplicationSupportDirectory, .UserDomainMask, true)
+    let applicationSupportDirectory = paths.first! as NSString!
+    let dbPath = applicationSupportDirectory.stringByAppendingPathComponent("Dock/desktoppicture.db")
+    
+    var db: COpaquePointer = nil
+    if sqlite3_open(dbPath, &db) == SQLITE_OK {
+        
+        if sqlite3_exec(db, "UPDATE DATA SET VALUE = ('\(getBackgroundImagePath())');", nil, nil, nil) == SQLITE_OK {
+            system("/usr/bin/killall Dock")
+        } else {
+            print(sqlite3_errmsg(db))
         }
+        
+    } else {
+        print(sqlite3_errmsg(db))
     }
     
+    sqlite3_close(db)
 }
 
 let urlBase = getBackgroundURLBase()
