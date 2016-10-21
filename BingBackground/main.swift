@@ -11,11 +11,12 @@ import AppKit
 
 func downloadJSON() -> NSDictionary {
     print("Downloading JSON...")
-    let data = NSData(contentsOfURL: NSURL(string: "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")!)!
+    
+    let data = try! Data(contentsOf: URL(string: "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US")!)
     var json: NSDictionary? = nil
     
     do {
-        json = try NSJSONSerialization.JSONObjectWithData(data, options: .MutableContainers) as? NSDictionary
+        json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? NSDictionary
     } catch let error as NSError {
         NSLog("\(error.localizedDescription)")
     }
@@ -25,25 +26,25 @@ func downloadJSON() -> NSDictionary {
 
 func getBackgroundURLBase() -> String {
     let jsonObject = downloadJSON()
-    return "https://www.bing.com/" + ((jsonObject["images"] as! NSArray)[0]["urlbase"] as! String)
+    return "https://www.bing.com/" + ((((jsonObject["images"] as! NSArray)[0]) as! NSDictionary)["urlbase"] as! String)
 }
 
-func websiteExists(url: String) -> Bool {
-    let request = NSURLRequest(URL: NSURL(string: url)!)
-    var response: NSURLResponse? = nil
+func websiteExists(_ url: String) -> Bool {
+    let request = URLRequest(url: URL(string: url)!)
+    var response: URLResponse? = nil
     
     do {
-        try NSURLConnection.sendSynchronousRequest(request, returningResponse: &response) as NSData?
+        _ = try NSURLConnection.sendSynchronousRequest(request, returning: &response) as Data?
     } catch let error as NSError {
         NSLog("\(error.localizedDescription)")
     }
     
-    let httpResponse = response as! NSHTTPURLResponse
+    let httpResponse = response as! HTTPURLResponse
     return httpResponse.statusCode == 200
 }
 
-func getResolutionExtension(url: String) -> String {
-    let screen = NSScreen.mainScreen()!
+func getResolutionExtension(_ url: String) -> String {
+    let screen = NSScreen.main()!
     let resolution = screen.visibleFrame
     var width = Int(resolution.width)
     var height = Int(resolution.height)
@@ -66,53 +67,53 @@ func getResolutionExtension(url: String) -> String {
     }
 }
 
-func downloadBackground(url: String) -> NSData {
+func downloadBackground(_ url: String) -> Data {
     print("Downloading background...")
-    return NSData(contentsOfURL: NSURL(string: url)!)!
+    return (try! Data(contentsOf: URL(string: url)!))
 }
 
 func getBackgroundImagePath() -> String {
-    let picturesDirectory = NSSearchPathForDirectoriesInDomains(.PicturesDirectory, .UserDomainMask, true)[0]
-    let calendar = NSCalendar(calendarIdentifier: NSCalendarIdentifierGregorian)
-    let year = calendar?.component(.Year, fromDate: NSDate())
-    let dateFormatter = NSDateFormatter()
+    let picturesDirectory = NSSearchPathForDirectoriesInDomains(.picturesDirectory, .userDomainMask, true)[0]
+    let calendar = Calendar(identifier: Calendar.Identifier.gregorian)
+    let year = (calendar as NSCalendar?)?.component(.year, from: Date())
+    let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "M-d-yyyy"
     let saveDirectory = picturesDirectory + "/Bing Backgrounds" + "/\(year!)"
     
     do {
-        try NSFileManager.defaultManager().createDirectoryAtPath(saveDirectory, withIntermediateDirectories: true, attributes: nil)
+        try FileManager.default.createDirectory(atPath: saveDirectory, withIntermediateDirectories: true, attributes: nil)
     } catch let error as NSError {
         NSLog("\(error.localizedDescription)")
     }
 
-    return saveDirectory + "/\(dateFormatter.stringFromDate(NSDate())).jpg"
+    return saveDirectory + "/\(dateFormatter.string(from: Date())).jpg"
 }
 
-func saveBackground(background: NSData) {
+func saveBackground(_ background: Data) {
     print("Saving background...")
-    background.writeToFile(getBackgroundImagePath(), atomically: true)
+    try? background.write(to: URL(fileURLWithPath: getBackgroundImagePath()), options: [.atomic])
 }
 
 func setBackground() {
     print("Setting background...")
     
-    let paths = NSSearchPathForDirectoriesInDomains(.ApplicationSupportDirectory, .UserDomainMask, true)
+    let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
     let applicationSupportDirectory = paths.first! as NSString!
-    let dbPath = applicationSupportDirectory.stringByAppendingPathComponent("Dock/desktoppicture.db")
+    let dbPath = applicationSupportDirectory?.appendingPathComponent("Dock/desktoppicture.db")
     
-    var db: COpaquePointer = nil
+    var db: OpaquePointer? = nil
     if sqlite3_open(dbPath, &db) == SQLITE_OK {
-        
         if sqlite3_exec(db, "UPDATE DATA SET VALUE = ('\(getBackgroundImagePath())');", nil, nil, nil) == SQLITE_OK {
-            system("/usr/bin/killall Dock")
+            let process = Process()
+            process.launchPath = "/usr/bin/killall"
+            process.arguments = ["Dock"]
+            process.launch()
         } else {
             print(sqlite3_errmsg(db))
         }
-        
     } else {
         print(sqlite3_errmsg(db))
     }
-    
     sqlite3_close(db)
 }
 

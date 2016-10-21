@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ShouldSaveBackgroundImages</key>
+	<true/>
+	<key>ShouldOnlySaveLatestImage</key>
+	<false/>
+	<key>BackgroundImageSaveDirectory</key>
+	<string></string>
+	<key>BackgroundImageFileNameAsTitle</key>
+	<false/>
+	<key>BackgroundImageFileNameAsDate</key>
+	<true/>
+	<key>LocaleIndex</key>
+	<integer>0</integer>
+	<key>Locales</key>
+	<dict>
+		<key>en-US</key>
+		<string></string>
+		<key>fr-FR</key>
+		<string></string>
+		<key>en-AU</key>
+		<string></string>
+		<key>pt-BR</key>
+		<string></string>
+		<key>en-CA</key>
+		<string></string>
+		<key>fr-CA</key>
+		<string></string>
+		<key>zh-CN</key>
+		<string></string>
+		<key>de-DE</key>
+		<string></string>
+		<key>en-GB</key>
+		<string></string>
+	</dict>
+</dict>
+</plist>
