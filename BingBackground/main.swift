@@ -34,17 +34,16 @@ func websiteExists(_ url: String) -> Bool {
     var response: URLResponse? = nil
     
     do {
-        _ = try NSURLConnection.sendSynchronousRequest(request, returning: &response) as Data?
+        let data = try NSURLConnection.sendSynchronousRequest(request, returning: &response) as NSData?
+        return ((data?.length)! > 256)
     } catch let error as NSError {
         NSLog("\(error.localizedDescription)")
     }
-    
-    let httpResponse = response as! HTTPURLResponse
-    return httpResponse.statusCode == 200
+    return false
 }
 
 func getResolutionExtension(_ url: String) -> String {
-    let screen = NSScreen.main()!
+    let screen = NSScreen.main!
     let resolution = screen.visibleFrame
     var width = Int(resolution.width)
     var height = Int(resolution.height)
@@ -98,7 +97,7 @@ func setBackground() {
     print("Setting background...")
     
     let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
-    let applicationSupportDirectory = paths.first! as NSString!
+    let applicationSupportDirectory = paths.first! as NSString?
     let dbPath = applicationSupportDirectory?.appendingPathComponent("Dock/desktoppicture.db")
     
     var db: OpaquePointer? = nil
